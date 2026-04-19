@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0984e3">
+    <title>NoFap Monitor Pro</title>
+    <!-- Web Manifest for PWA -->
+    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIk5vRmFwIE1vbml0b3IgUHJvIiwKICAic2hvcnRfbmFtZSI6ICJNb25pdG9yIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmOGY5ZmEiLAogICJ0aGVtZV9jb2xvciI6ICIjMDk4NGUzIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZmbGF0aWNvbi5jb20vNTEyLzI5NzIvMjk3MjUwOC5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0KICBdCn0=">
+    
+    <style>
+        :root {
+            --primary: #0984e3;
+            --primary-dark: #074b81;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #2d3436;
+            --text-light: #636e72;
+            --border: #dfe6e9;
+            --shadow: 0 10px 20px rgba(0,0,0,0.05);
+            --radius: 20px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f0f0f;
+            --card: #1a1a1a;
+            --text: #f5f6fa;
+            --text-light: #a4b0be;
+            --border: #2f3542;
+            --shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            padding-bottom: 100px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- Header & Privacy --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .privacy-blur { filter: blur(8px) grayscale(1); pointer-events: none; transition: var(--transition); }
+
+        /* --- Cards --- */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+
+        /* --- Streak Engine --- */
+        .streak-main { text-align: center; }
+        .streak-count { font-size: 5rem; font-weight: 800; line-height: 1; color: var(--primary); margin: 10px 0; }
+        .streak-label { text-transform: uppercase; letter-spacing: 2px; font-size: 0.75rem; color: var(--text-light); }
+
+        /* --- Buttons & Inputs --- */
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 14px 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-checkin { background: var(--success); color: white; margin-bottom: 10px; }
+        .btn-checkin:disabled { background: var(--border); cursor: not-allowed; }
+        .btn-urge { background: var(--primary); color: white; }
+        .btn-relapse { background: transparent; color: var(--danger); border: 1.5px solid var(--danger); margin-top: 15px; }
+
+        /* --- Insights & Graph --- */
+        .insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .insight-box { background: var(--bg); padding: 15px; border-radius: 15px; text-align: center; }
+        .insight-val { display: block; font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+        .insight-lbl { font-size: 0.7rem; color: var(--text-light); text-transform: uppercase; }
+
+        .graph-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 100px;
+            margin-top: 20px;
+            padding: 0 10px;
+        }
+        .graph-bar {
+            width: 12%;
+            background: var(--primary);
+            border-radius: 4px 4px 0 0;
+            transition: height 1s ease;
+            position: relative;
+        }
+        .graph-bar::after {
+            content: attr(data-label);
+            position: absolute;
+            bottom: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 8px;
+            color: var(--text-light);
+        }
+
+        /* --- Score & Badges --- */
+        .score-circle {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            border: 5px solid var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; margin: 0 auto 15px;
+        }
+
+        .badge-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+        .badge {
+            aspect-ratio: 1;
+            background: var(--bg);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+            filter: grayscale(1);
+            opacity: 0.3;
+            transition: var(--transition);
+        }
+        .badge.unlocked { filter: grayscale(0); opacity: 1; background: #fff5e6; border: 2px solid var(--warning); }
+
+        /* --- Intensity Modal --- */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000; padding: 20px;
+        }
+        .modal-content { background: var(--card); padding: 25px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; }
+
+        /* --- Warning Banner --- */
+        .warning-banner {
+            background: #fff3cd; color: #856404;
+            padding: 10px; border-radius: 10px; margin-bottom: 15px;
+            font-size: 0.85rem; text-align: center; font-weight: 600;
+            display: none;
+        }
+
+        /* --- Utils --- */
+        .hidden { display: none !important; }
+        .flex { display: flex; gap: 10px; }
+        
+        /* Floating Export */
+        .fab {
+            position: fixed; bottom: 20px; right: 20px;
+            width: 50px; height: 50px; border-radius: 25px;
+            background: var(--primary); color: white;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 5px 15px rgba(9, 132, 227, 0.4);
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <div>
+                <h2 style="margin:0">NoFap Monitor <span style="color:var(--primary)">Pro</span></h2>
+                <div id="date-now" style="font-size: 0.8rem; color: var(--text-light);"></div>
+            </div>
+            <div class="flex">
+                <button class="theme-toggle" id="themeBtn" style="width:auto; padding: 8px;">🌙</button>
+                <button id="privacyBtn" style="width:auto; padding: 8px;">👁️</button>
+            </div>
+        </header>
+
+        <div id="warning-checkin" class="warning-banner">⚠️ You missed a check-in yesterday! Streak calculation adjusted.</div>
+
+        <!-- Setup View -->
+        <div id="view-setup" class="card hidden">
+            <h3>Start Your Era</h3>
+            <p style="font-size: 0.9rem; color: var(--text-light);">Discipline begins with the first second of awareness.</p>
+            <button class="btn-checkin" onclick="initApp()">Begin Today</button>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div id="view-main" class="hidden">
+            <div class="card streak-main">
+                <div class="streak-label">Current Strength</div>
+                <div class="streak-count privacy-target" id="count-streak">0</div>
+                <div id="streak-level" style="font-weight: 800; color: var(--primary); margin-bottom: 20px;">Beginner</div>
+                
+                <button id="btn-today-checkin" class="btn-checkin" onclick="handleCheckIn()">Mark Today Clean ✅</button>
+                <button class="btn-urge" onclick="showUrgeModal()">Resisted an Urge 💪</button>
+                <button class="btn-relapse" onclick="handleRelapse()">I Relapsed</button>
+            </div>
+
+            <!-- Score & Badges -->
+            <div class="card">
+                <div class="score-circle privacy-target" id="score-val">0</div>
+                <div class="streak-label" style="text-align: center; margin-bottom: 15px;">Discipline Score</div>
+                <div class="badge-grid" id="badge-container">
+                    <div class="badge" title="First Step (1 Day)">🌱</div>
+                    <div class="badge" title="7 Day Focus">🔥</div>
+                    <div class="badge" title="30 Day Warrior">🛡️</div>
+                    <div class="badge" title="90 Day Monk">👑</div>
+                </div>
+            </div>
+
+            <!-- Insights -->
+            <div class="card">
+                <div class="streak-label">Weekly Insight</div>
+                <div class="graph-container" id="graph-urges">
+                    <!-- Bars generated by JS -->
+                </div>
+                <div class="insight-grid">
+                    <div class="insight-box">
+                        <span class="insight-val" id="ins-urges">0</span>
+                        <span class="insight-lbl">Total Urges</span>
+                    </div>
+                    <div class="insight-box">
+                        <span class="insight-val" id="ins-intensity">-</span>
+                        <span class="insight-lbl">Top Intensity</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Urge Modal -->
+    <div id="urge-modal" class="modal">
+        <div class="modal-content">
+            <h3>Urge Intensity</h3>
+            <p>How strong was the pull?</p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button style="background: var(--success); color: white;" onclick="recordUrge('Low')">Low - A passing thought</button>
+                <button style="background: var(--warning); color: #000;" onclick="recordUrge('Medium')">Medium - Required focus</button>
+                <button style="background: var(--danger); color: white;" onclick="recordUrge('High')">High - Intense battle</button>
+                <button style="background: var(--border); color: var(--text);" onclick="closeUrgeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <button class="fab" onclick="exportData()" title="Export Data">💾</button>
+
+    <script>
+        /* --- Core State --- */
+        let state = {
+            checkIns: [], // Array of YYYY-MM-DD strings
+            relapses: [], // Array of YYYY-MM-DD strings
+            urges: [],    // Array of {date: string, level: string}
+            theme: 'light',
+            privacy: false,
+            bestStreak: 0
+        };
+
+        const SEC_IN_DAY = 86400000;
+
+        /* --- Initialization --- */
+        function initApp() {
+            const saved = localStorage.getItem('noFapProData');
+            if (saved) {
+                state = JSON.parse(saved);
+                document.documentElement.setAttribute('data-theme', state.theme);
+                if (state.privacy) togglePrivacy(true);
+                showView('main');
+            } else {
+                showView('setup');
+                // Auto-init for new users on button click
+            }
+            
+            if (!state.checkIns) state.checkIns = []; // Migration safety
+            
+            updateUI();
+            startClock();
+        }
+
+        function initAppFirstTime() {
+            state.checkIns.push(getTodayStr());
+            save();
+            showView('main');
+            updateUI();
+        }
+
+        /* --- Logic Engine --- */
+        function getTodayStr() { return new Date().toISOString().split('T')[0]; }
+
+        function calculateSmartStreak() {
+            if (state.checkIns.length === 0) return 0;
+            
+            const sorted = [...new Set(state.checkIns)].sort().reverse();
+            let streak = 0;
+            let current = new Date(getTodayStr());
+
+            // If no check-in today, start checking from yesterday
+            if (sorted[0] !== getTodayStr()) {
+                current.setDate(current.getDate() - 1);
+            }
+
+            for (let dateStr of sorted) {
+                const checkDate = new Date(dateStr + "T00:00:00");
+                const diff = (current - checkDate) / SEC_IN_DAY;
+                
+                if (diff === 0) {
+                    streak++;
+                    current.setDate(current.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+            return streak;
+        }
+
+        function calculateScore() {
+            const streak = calculateSmartStreak();
+            const urgeBonus = state.urges.length * 2;
+            const relapsePenalty = state.relapses.length * 15;
+            let score = (streak * 3) + urgeBonus - relapsePenalty;
+            return Math.min(100, Math.max(0, score));
+        }
+
+        /* --- Actions --- */
+        function handleCheckIn() {
+            const today = getTodayStr();
+            if (!state.checkIns.includes(today)) {
+                state.checkIns.push(today);
+                save();
+                updateUI();
+                createRipple(event);
+            }
+        }
+
+        function handleRelapse() {
+            if (confirm("Reset everything? Your honesty is your only path to growth.")) {
+                state.relapses.push(getTodayStr());
+                state.checkIns = [];
+                save();
+                updateUI();
+            }
+        }
+
+        function recordUrge(level) {
+            state.urges.push({ date: getTodayStr(), level: level });
+            save();
+            closeUrgeModal();
+            updateUI();
+        }
+
+        /* --- UI Components --- */
+        function updateUI() {
+            const streak = calculateSmartStreak();
+            const today = getTodayStr();
+            const yesterday = new Date(Date.now() - SEC_IN_DAY).toISOString().split('T')[0];
+
+            // Streak & Check-in
+            document.getElementById('count-streak').innerText = streak;
+            const checkBtn = document.getElementById('btn-today-checkin');
+            if (state.checkIns.includes(today)) {
+                checkBtn.disabled = true;
+                checkBtn.innerText = "Check-in Complete";
+            } else {
+                checkBtn.disabled = false;
+                checkBtn.innerText = "Mark Today Clean ✅";
+            }
+
+            // Missed Checkin Warning
+            const missed = !state.checkIns.includes(today) && !state.checkIns.includes(yesterday) && state.checkIns.length > 0;
+            document.getElementById('warning-checkin').style.display = missed ? 'block' : 'none';
+
+            // Level Logic
+            const levels = ["Beginner", "Rising", "Strong", "Warrior", "Monk Mode 🔥"];
+            const lvlIdx = streak >= 90 ? 4 : streak >= 30 ? 3 : streak >= 14 ? 2 : streak >= 7 ? 1 : 0;
+            document.getElementById('streak-level').innerText = levels[lvlIdx];
+
+            // Score & Badges
+            document.getElementById('score-val').innerText = calculateScore();
+            const badges = document.querySelectorAll('.badge');
+            const milestones = [1, 7, 30, 90];
+            milestones.forEach((m, i) => {
+                if (streak >= m) badges[i].classList.add('unlocked');
+                else badges[i].classList.remove('unlocked');
+            });
+
+            // Insights
+            document.getElementById('ins-urges').innerText = state.urges.length;
+            const counts = state.urges.reduce((acc, curr) => {
+                acc[curr.level] = (acc[curr.level] || 0) + 1;
+                return acc;
+            }, {});
+            const topIntensity = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, "-");
+            document.getElementById('ins-intensity').innerText = topIntensity;
+
+            renderGraph();
+        }
+
+        function renderGraph() {
+            const container = document.getElementById('graph-urges');
+            container.innerHTML = '';
+            const last7Days = [...Array(7)].map((_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                return d.toISOString().split('T')[0];
+            }).reverse();
+
+            last7Days.forEach(day => {
+                const count = state.urges.filter(u => u.date === day).length;
+                const bar = document.createElement('div');
+                bar.className = 'graph-bar';
+                bar.style.height = `${Math.min(count * 20, 100)}%`;
+                bar.setAttribute('data-label', day.split('-')[2]);
+                container.appendChild(bar);
+            });
+        }
+
+        /* --- System --- */
+        function save() { localStorage.setItem('noFapProData', JSON.stringify(state)); }
+
+        function showView(view) {
+            document.getElementById('view-setup').classList.toggle('hidden', view !== 'setup');
+            document.getElementById('view-main').classList.toggle('hidden', view !== 'main');
+        }
+
+        function startClock() {
+            const update = () => {
+                document.getElementById('date-now').innerText = new Date().toLocaleDateString('en-US', { 
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+                });
+            };
+            update();
+            setInterval(update, 60000);
+        }
+
+        /* --- UX Features --- */
+        function showUrgeModal() { document.getElementById('urge-modal').style.display = 'flex'; }
+        function closeUrgeModal() { document.getElementById('urge-modal').style.display = 'none'; }
+
+        document.getElementById('themeBtn').addEventListener('click', () => {
+            state.theme = state.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', state.theme);
+            document.getElementById('themeBtn').innerText = state.theme === 'dark' ? '☀️' : '🌙';
+            save();
+        });
+
+        document.getElementById('privacyBtn').addEventListener('click', () => togglePrivacy());
+
+        function togglePrivacy(init = null) {
+            state.privacy = init !== null ? init : !state.privacy;
+            const targets = document.querySelectorAll('.privacy-target');
+            targets.forEach(t => t.classList.toggle('privacy-blur', state.privacy));
+            document.getElementById('privacyBtn').innerText = state.privacy ? '🕶️' : '👁️';
+            save();
+        }
+
+        function createRipple(event) {
+            const button = event.currentTarget;
+            const circle = document.createElement("span");
+            const diameter = Math.max(button.clientWidth, button.clientHeight);
+            const radius = diameter / 2;
+            circle.style.width = circle.style.height = `${diameter}px`;
+            circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+            circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+            circle.classList.add("ripple");
+            // Basic ripple CSS needed
+            button.appendChild(circle);
+            setTimeout(() => circle.remove(), 600);
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "nofap_monitor_backup.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // Service Worker for Offline
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('install', e => e.waitUntil(caches.open('pwa').then(c => c.add('/'))));
+                self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
+            `;
+            const blob = new Blob([swCode], {type: 'application/javascript'});
+            navigator.serviceWorker.register(URL.createObjectURL(blob));
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
