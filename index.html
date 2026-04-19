@@ -3,482 +3,409 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NoFap Monitor | Discipline & Growth</title>
+    <title>NoFap Monitor | Discipline & Control</title>
     <style>
-        /* --- CSS Variables & Themes --- */
+        /* --- Design System & Variables --- */
         :root {
-            --bg-color: #f8f9fa;
+            --bg-color: #f0f2f5;
             --card-bg: #ffffff;
-            --text-main: #2d3436;
-            --text-muted: #636e72;
-            --accent-color: #0984e3;
-            --success-color: #00b894;
-            --relapse-color: #d63031;
-            --border-color: #dfe6e9;
-            --shadow: 0 4px 6px rgba(0,0,0,0.05);
-            --transition: all 0.3s ease;
+            --text-main: #1a1a1a;
+            --text-muted: #65676b;
+            --accent: #2d3436;
+            --primary: #0984e3;
+            --success: #00b894;
+            --relapse: #d63031;
+            --urge: #6c5ce7;
+            --border: #e4e6eb;
+            --shadow: 0 8px 24px rgba(0,0,0,0.08);
+            --radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         [data-theme="dark"] {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
-            --text-main: #e0e0e0;
-            --text-muted: #b0b0b0;
-            --accent-color: #74b9ff;
-            --success-color: #55efc4;
-            --relapse-color: #ff7675;
-            --border-color: #333;
-            --shadow: 0 4px 10px rgba(0,0,0,0.3);
+            --text-main: #e4e6eb;
+            --text-muted: #b0b3b8;
+            --accent: #ffffff;
+            --border: #333333;
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
 
-        /* --- Global Styles --- */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-
+        /* --- Base Styles --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
+        
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
             transition: var(--transition);
-            line-height: 1.6;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
             min-height: 100vh;
+            padding: 20px;
         }
 
-        .container {
-            width: 100%;
-            max-width: 500px;
-            animation: fadeIn 0.8s ease;
-        }
+        .container { width: 100%; max-width: 480px; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- UI Elements --- */
+        /* --- Header --- */
         header {
+            width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 100%;
             margin-bottom: 30px;
+            padding: 0 10px;
         }
 
+        .branding h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
+        .branding p { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); }
+
+        /* --- Components --- */
         .card {
             background: var(--card-bg);
-            border-radius: 16px;
+            border-radius: var(--radius);
             padding: 24px;
             margin-bottom: 20px;
             box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-            text-align: center;
+            border: 1px solid var(--border);
+            animation: slideUp 0.5s ease-out;
         }
 
-        /* --- Streak Display --- */
-        .streak-value {
-            font-size: 5rem;
-            font-weight: 800;
-            color: var(--accent-color);
-            line-height: 1;
-            margin: 10px 0;
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .streak-label {
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        /* --- Buttons --- */
         button {
             cursor: pointer;
             border: none;
-            border-radius: 8px;
-            padding: 12px 24px;
+            border-radius: 12px;
+            padding: 14px 20px;
             font-weight: 600;
-            transition: var(--transition);
             font-size: 1rem;
-        }
-
-        .btn-primary {
-            background: var(--accent-color);
-            color: white;
+            transition: var(--transition);
             width: 100%;
-            margin-top: 15px;
         }
 
-        .btn-relapse {
-            background: transparent;
-            color: var(--relapse-color);
-            border: 1px solid var(--relapse-color);
-            margin-top: 20px;
-            font-size: 0.85rem;
-            padding: 8px 16px;
-        }
+        button:active { transform: scale(0.98); }
 
-        .btn-relapse:hover {
-            background: var(--relapse-color);
-            color: white;
-        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-urge { background: var(--urge); color: white; margin-top: 10px; }
+        .btn-urge:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-relapse { background: transparent; color: var(--relapse); border: 1.5px solid var(--relapse); margin-top: 20px; font-size: 0.9rem; }
+        .btn-relapse:hover { background: var(--relapse); color: white; }
 
         .theme-toggle {
-            background: transparent;
-            color: var(--text-main);
-            font-size: 1.2rem;
-            padding: 5px;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--card-bg); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+        }
+
+        /* --- Streak System --- */
+        .streak-hero { text-align: center; }
+        .streak-num { font-size: 5.5rem; font-weight: 900; line-height: 1; color: var(--accent); }
+        .streak-label { color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem; font-weight: 700; margin-bottom: 10px; }
+        
+        .level-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            background: var(--bg-color);
+            margin-top: 10px;
+            border: 1px solid var(--border);
         }
 
         /* --- Stats Grid --- */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .stat-item {
-            background: var(--card-bg);
-            padding: 15px 10px;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            text-align: center;
-            border: 1px solid var(--border-color);
-        }
-
-        .stat-val {
-            display: block;
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: var(--accent-color);
-        }
-
-        .stat-lbl {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-
-        /* --- Milestones --- */
-        .milestone-container {
-            text-align: left;
-        }
-
-        .milestone-row {
-            margin-bottom: 15px;
-        }
-
-        .milestone-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            margin-bottom: 5px;
-        }
-
-        .progress-bar {
-            height: 8px;
-            background: var(--border-color);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--success-color);
-            width: 0%;
-            transition: width 1s ease-in-out;
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: var(--card-bg); padding: 16px; border-radius: var(--radius); border: 1px solid var(--border); text-align: center; }
+        .stat-val { display: block; font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+        .stat-lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
 
         /* --- Calendar --- */
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            margin-top: 15px;
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 15px; }
+        .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; border-radius: 8px; background: var(--bg-color); font-weight: 600; }
+        .day-today { outline: 2px solid var(--primary); outline-offset: -2px; }
+        .day-success { background: var(--success); color: white; }
+        .day-relapse { background: var(--relapse); color: white; }
+
+        /* --- Modal --- */
+        .modal-overlay {
+            position: fixed; top:0; left:0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000;
+            backdrop-filter: blur(4px);
         }
+        .modal { background: var(--card-bg); padding: 30px; border-radius: var(--radius); width: 90%; max-width: 400px; text-align: center; }
+        .modal h3 { margin-bottom: 10px; }
+        .modal p { color: var(--text-muted); margin-bottom: 20px; }
+        .modal-btns { display: flex; gap: 10px; }
 
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            border-radius: 4px;
-            background: var(--border-color);
-            color: var(--text-muted);
-        }
-
-        .day-success { background: var(--success-color); color: white; }
-        .day-relapse { background: var(--relapse-color); color: white; }
-        .day-future { opacity: 0.3; }
-
-        /* --- Motivation --- */
-        #quote-text {
-            font-style: italic;
-            color: var(--text-main);
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        #quote-author {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        /* --- Responsive --- */
-        @media (max-width: 400px) {
-            .streak-value { font-size: 3.5rem; }
-            .stats-grid { grid-template-columns: 1fr; }
-        }
-
-        .hidden { display: none; }
+        /* --- Utils --- */
+        .hidden { display: none !important; }
+        .progress-container { height: 6px; background: var(--border); border-radius: 10px; margin: 10px 0; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--success); width: 0%; transition: width 1s ease; }
+        input[type="date"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); margin: 15px 0; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <header>
-            <h2 style="font-weight: 800; letter-spacing: -1px;">MONITOR</h2>
-            <button class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">🌓</button>
+            <div class="branding">
+                <h1>NoFap Monitor</h1>
+                <p>Discipline • Focus • Control</p>
+            </div>
+            <button class="theme-toggle" id="themeToggle">🌓</button>
         </header>
 
-        <!-- Setup View (Only shown first time) -->
-        <div id="setup-view" class="card hidden">
-            <h3>Begin Your Journey</h3>
-            <p style="color: var(--text-muted); margin: 15px 0;">Discipline is the bridge between goals and accomplishment.</p>
-            <label style="font-size: 0.8rem; display: block; margin-bottom: 5px;">When was your last relapse?</label>
-            <input type="date" id="start-date-input" style="padding: 10px; width: 100%; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 10px;">
-            <button class="btn-primary" onclick="initTracker()">Start Tracking</button>
+        <!-- Start Tracking View (Empty State) -->
+        <div id="start-view" class="card hidden">
+            <div style="text-align: center;">
+                <h2 style="margin-bottom: 10px;">Start Your Journey 🔥</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Choose the date you began your discipline journey.</p>
+                <input type="date" id="init-date-picker">
+                <button class="btn-primary" onclick="startTracking()">Start Tracking</button>
+            </div>
         </div>
 
-        <!-- Main Tracker View -->
-        <div id="tracker-view">
-            <div class="card">
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="hidden">
+            <div class="card streak-hero">
                 <div class="streak-label">Current Streak</div>
-                <div class="streak-value" id="current-streak">0</div>
+                <div class="streak-num" id="streak-display">0</div>
                 <div class="streak-label">Days Clean</div>
-                <p id="motivational-msg" style="margin-top: 15px; font-weight: 500; color: var(--success-color);"></p>
-                <button class="btn-relapse" onclick="handleRelapse()">I Relapsed</button>
+                <div id="level-badge" class="level-badge">Beginner</div>
+                
+                <div style="margin-top: 25px;">
+                    <button class="btn-urge" id="urge-btn" onclick="registerUrge()">I resisted an urge today 💪</button>
+                    <button class="btn-relapse" onclick="showModal()">I Relapsed</button>
+                </div>
             </div>
 
             <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-val" id="stat-current">0</span>
-                    <span class="stat-lbl">Current</span>
-                </div>
-                <div class="stat-item">
+                <div class="stat-card">
                     <span class="stat-val" id="stat-best">0</span>
-                    <span class="stat-lbl">Best</span>
+                    <span class="stat-lbl">Best Streak</span>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-val" id="stat-total">0</span>
-                    <span class="stat-lbl">Relapses</span>
+                <div class="stat-card">
+                    <span class="stat-val" id="stat-urges">0</span>
+                    <span class="stat-lbl">Urges Survived</span>
                 </div>
-            </div>
-
-            <div class="card milestone-container">
-                <h4 style="margin-bottom: 15px;">Milestones</h4>
-                <div id="milestones-list"></div>
+                <div class="stat-card">
+                    <span class="stat-val" id="stat-relapses">0</span>
+                    <span class="stat-lbl">Total Relapses</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-val" id="stat-total-days">0</span>
+                    <span class="stat-lbl">Total Growth</span>
+                </div>
             </div>
 
             <div class="card">
-                <h4 id="calendar-month">Month</h4>
+                <h4 id="cal-title" style="margin-bottom: 15px; font-size: 0.9rem; text-transform: uppercase;">Calendar</h4>
                 <div class="calendar-grid" id="calendar-body"></div>
             </div>
 
-            <div class="card">
-                <span id="quote-text">"He who has a why to live can bear almost any how."</span>
-                <span id="quote-author">- Friedrich Nietzsche</span>
+            <div class="card" style="font-style: italic; text-align: center;">
+                <p id="quote-text" style="color: var(--text-main); margin-bottom: 8px;"></p>
+                <p id="quote-author" style="color: var(--text-muted); font-size: 0.8rem; font-weight: 600;"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <h3>Are you sure?</h3>
+            <p>This will reset your current streak to zero. Every failure is a lesson, but honesty is key.</p>
+            <div class="modal-btns">
+                <button style="background: var(--border); color: var(--text-main);" onclick="hideModal()">Cancel</button>
+                <button class="btn-primary" style="background: var(--relapse);" onclick="confirmRelapse()">Reset Streak</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- Data Logic ---
-        let userData = {
+        /* --- State Management --- */
+        let state = {
             startDate: null,
-            relapseHistory: [],
             bestStreak: 0,
+            relapseDates: [],
+            urgesResisted: [],
             theme: 'light'
         };
 
         const quotes = [
-            { t: "Discipline is doing what needs to be done, even if you don't want to do it.", a: "Unknown" },
-            { t: "The first and greatest victory is to conquer yourself.", a: "Plato" },
+            { t: "He who has a why to live can bear almost any how.", a: "Nietzsche" },
             { t: "Suffer the pain of discipline or suffer the pain of regret.", a: "Jim Rohn" },
-            { t: "Your future self will thank you for not giving up today.", a: "Unknown" },
-            { t: "Great acts are made up of small deeds.", a: "Lao Tzu" },
+            { t: "The first and greatest victory is to conquer yourself.", a: "Plato" },
             { t: "Freedom is not found in doing what you want, but in being master of yourself.", a: "Unknown" },
-            { t: "A man who masters himself is mightier than one who conquers a city.", a: "Proverbs" }
+            { t: "Discipline is the bridge between goals and accomplishment.", a: "Jim Rohn" }
         ];
 
-        const milestones = [7, 30, 90];
-
-        // --- Core Functions ---
-
-        function loadData() {
-            const saved = localStorage.getItem('noFapData');
+        /* --- Initialization --- */
+        function init() {
+            const saved = localStorage.getItem('noFapDataV2');
             if (saved) {
-                userData = JSON.parse(saved);
-                document.documentElement.setAttribute('data-theme', userData.theme);
-                showView('tracker');
-                updateUI();
+                state = JSON.parse(saved);
+                document.documentElement.setAttribute('data-theme', state.theme);
+                showDashboard();
             } else {
-                showView('setup');
-                // Set default date to today for input
-                document.getElementById('start-date-input').valueAsDate = new Date();
+                document.getElementById('start-view').classList.remove('hidden');
+                document.getElementById('init-date-picker').valueAsDate = new Date();
             }
         }
 
-        function saveData() {
-            localStorage.setItem('noFapData', JSON.stringify(userData));
+        function save() {
+            localStorage.setItem('noFapDataV2', JSON.stringify(state));
         }
 
-        function showView(view) {
-            document.getElementById('setup-view').classList.toggle('hidden', view !== 'setup');
-            document.getElementById('tracker-view').classList.toggle('hidden', view !== 'tracker');
-        }
-
-        function initTracker() {
-            const inputDate = document.getElementById('start-date-input').value;
-            if (!inputDate) return alert("Please select a date");
+        /* --- Core Logic --- */
+        function startTracking() {
+            const dateVal = document.getElementById('init-date-picker').value;
+            if (!dateVal) return;
             
-            userData.startDate = new Date(inputDate).getTime();
-            showView('tracker');
-            updateUI();
-            saveData();
+            state.startDate = new Date(dateVal).setHours(0,0,0,0);
+            showDashboard();
+            save();
         }
 
         function calculateStreak() {
-            if (!userData.startDate) return 0;
-            const diff = Date.now() - userData.startDate;
+            const diff = Date.now() - state.startDate;
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
             return days < 0 ? 0 : days;
         }
 
-        function handleRelapse() {
-            if (confirm("Reset your streak? Be honest with yourself. Every failure is a lesson.")) {
-                const today = new Date().setHours(0,0,0,0);
-                userData.relapseHistory.push(today);
-                
-                // Check if current streak was the best
-                const current = calculateStreak();
-                if (current > userData.bestStreak) userData.bestStreak = current;
-                
-                // Reset start date to now
-                userData.startDate = new Date().getTime();
-                
+        function getLevel(streak) {
+            if (streak >= 90) return { name: "Monk Mode 🔥", color: "#f1c40f" };
+            if (streak >= 31) return { name: "Strong", color: "#00b894" };
+            if (streak >= 8) return { name: "Controlled", color: "#0984e3" };
+            if (streak >= 4) return { name: "Rising", color: "#6c5ce7" };
+            return { name: "Beginner", color: "var(--text-muted)" };
+        }
+
+        /* --- Actions --- */
+        function registerUrge() {
+            const today = new Date().toDateString();
+            if (!state.urgesResisted.includes(today)) {
+                state.urgesResisted.push(today);
                 updateUI();
-                saveData();
+                save();
             }
+        }
+
+        function confirmRelapse() {
+            const today = new Date().setHours(0,0,0,0);
+            state.relapseDates.push(today);
+            
+            const current = calculateStreak();
+            if (current > state.bestStreak) state.bestStreak = current;
+            
+            state.startDate = new Date().setHours(0,0,0,0);
+            hideModal();
+            updateUI();
+            save();
+        }
+
+        /* --- UI Rendering --- */
+        function showDashboard() {
+            document.getElementById('start-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+            updateUI();
         }
 
         function updateUI() {
-            const currentStreak = calculateStreak();
+            const streak = calculateStreak();
+            if (streak > state.bestStreak) state.bestStreak = streak;
+
+            // Update Streak & Level
+            const display = document.getElementById('streak-display');
+            display.innerText = streak;
             
-            // Best streak update
-            if (currentStreak > userData.bestStreak) {
-                userData.bestStreak = currentStreak;
+            const level = getLevel(streak);
+            const badge = document.getElementById('level-badge');
+            badge.innerText = level.name;
+            badge.style.color = level.color;
+
+            // Stats
+            document.getElementById('stat-best').innerText = state.bestStreak;
+            document.getElementById('stat-urges').innerText = state.urgesResisted.length;
+            document.getElementById('stat-relapses').innerText = state.relapseDates.length;
+            document.getElementById('stat-total-days').innerText = streak + (state.bestStreak || 0);
+
+            // Urge Button State
+            const todayStr = new Date().toDateString();
+            const btnUrge = document.getElementById('urge-btn');
+            if (state.urgesResisted.includes(todayStr)) {
+                btnUrge.disabled = true;
+                btnUrge.innerText = "Urge Resisted Today 💪";
+            } else {
+                btnUrge.disabled = false;
+                btnUrge.innerText = "I resisted an urge today 💪";
             }
 
-            // Update DOM
-            document.getElementById('current-streak').innerText = currentStreak;
-            document.getElementById('stat-current').innerText = currentStreak;
-            document.getElementById('stat-best').innerText = userData.bestStreak;
-            document.getElementById('stat-total').innerText = userData.relapseHistory.length;
-            
-            // Message
-            const msgs = ["Stay strong 💪", "Focus on the goal", "One day at a time", "You're improving!"];
-            document.getElementById('motivational-msg').innerText = currentStreak === 0 ? "Starting is the hardest part." : msgs[currentStreak % msgs.length];
-
-            renderMilestones(currentStreak);
             renderCalendar();
             renderQuote();
-        }
-
-        function renderMilestones(streak) {
-            const container = document.getElementById('milestones-list');
-            container.innerHTML = '';
-            
-            milestones.forEach(m => {
-                const percent = Math.min(Math.round((streak / m) * 100), 100);
-                const row = document.createElement('div');
-                row.className = 'milestone-row';
-                row.innerHTML = `
-                    <div class="milestone-info">
-                        <span>${m} Day Challenge</span>
-                        <span>${percent}%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${percent}%"></div>
-                    </div>
-                `;
-                container.appendChild(row);
-            });
         }
 
         function renderCalendar() {
             const now = new Date();
             const year = now.getFullYear();
             const month = now.getMonth();
-            const monthName = now.toLocaleString('default', { month: 'long' });
-            
-            document.getElementById('calendar-month').innerText = `${monthName} ${year}`;
-            
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const calendarBody = document.getElementById('calendar-body');
-            calendarBody.innerHTML = '';
+            
+            const monthName = now.toLocaleString('default', { month: 'long' });
+            document.getElementById('cal-title').innerText = `${monthName} ${year}`;
+            
+            const body = document.getElementById('calendar-body');
+            body.innerHTML = '';
 
-            // Add empty spaces for previous month days
+            // Blank days
             for (let i = 0; i < firstDay; i++) {
-                const empty = document.createElement('div');
-                calendarBody.appendChild(empty);
+                body.appendChild(document.createElement('div'));
             }
 
-            for (let day = 1; day <= daysInMonth; day++) {
-                const div = document.createElement('div');
-                div.className = 'calendar-day';
-                div.innerText = day;
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'cal-day';
+                dayEl.innerText = d;
                 
-                const checkDate = new Date(year, month, day).setHours(0,0,0,0);
+                const time = new Date(year, month, d).setHours(0,0,0,0);
                 const today = new Date().setHours(0,0,0,0);
+
+                if (time === today) dayEl.classList.add('day-today');
                 
-                if (userData.relapseHistory.includes(checkDate)) {
-                    div.classList.add('day-relapse');
-                } else if (checkDate >= userData.startDate && checkDate <= today) {
-                    div.classList.add('day-success');
-                } else if (checkDate > today) {
-                    div.classList.add('day-future');
+                if (state.relapseDates.includes(time)) {
+                    dayEl.classList.add('day-relapse');
+                } else if (time >= state.startDate && time <= today) {
+                    dayEl.classList.add('day-success');
                 }
                 
-                calendarBody.appendChild(div);
+                body.appendChild(dayEl);
             }
         }
 
         function renderQuote() {
-            const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-            const quote = quotes[dayOfYear % quotes.length];
-            document.getElementById('quote-text').innerText = `"${quote.t}"`;
-            document.getElementById('quote-author').innerText = `- ${quote.a}`;
+            const idx = new Date().getDate() % quotes.length;
+            document.getElementById('quote-text').innerText = `"${quotes[idx].t}"`;
+            document.getElementById('quote-author').innerText = `— ${quotes[idx].a}`;
         }
 
-        // --- Theme Management ---
+        /* --- Modal Control --- */
+        function showModal() { document.getElementById('modal-overlay').style.display = 'flex'; }
+        function hideModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+
+        /* --- Theme --- */
         document.getElementById('themeToggle').addEventListener('click', () => {
-            userData.theme = userData.theme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', userData.theme);
-            saveData();
+            state.theme = state.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', state.theme);
+            save();
         });
 
-        // Initialize App
-        window.onload = loadData;
+        window.onload = init;
     </script>
 </body>
 </html>
