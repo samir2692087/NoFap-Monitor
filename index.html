@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoFap Monitor | Discipline & Growth</title>
+    <style>
+        /* --- CSS Variables & Themes --- */
+        :root {
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+            --accent-color: #0984e3;
+            --success-color: #00b894;
+            --relapse-color: #d63031;
+            --border-color: #dfe6e9;
+            --shadow: 0 4px 6px rgba(0,0,0,0.05);
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-muted: #b0b0b0;
+            --accent-color: #74b9ff;
+            --success-color: #55efc4;
+            --relapse-color: #ff7675;
+            --border-color: #333;
+            --shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* --- Global Styles --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            transition: var(--transition);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- UI Elements --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        /* --- Streak Display --- */
+        .streak-value {
+            font-size: 5rem;
+            font-weight: 800;
+            color: var(--accent-color);
+            line-height: 1;
+            margin: 10px 0;
+        }
+
+        .streak-label {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* --- Buttons --- */
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .btn-relapse {
+            background: transparent;
+            color: var(--relapse-color);
+            border: 1px solid var(--relapse-color);
+            margin-top: 20px;
+            font-size: 0.85rem;
+            padding: 8px 16px;
+        }
+
+        .btn-relapse:hover {
+            background: var(--relapse-color);
+            color: white;
+        }
+
+        .theme-toggle {
+            background: transparent;
+            color: var(--text-main);
+            font-size: 1.2rem;
+            padding: 5px;
+        }
+
+        /* --- Stats Grid --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: var(--card-bg);
+            padding: 15px 10px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-val {
+            display: block;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        .stat-lbl {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* --- Milestones --- */
+        .milestone-container {
+            text-align: left;
+        }
+
+        .milestone-row {
+            margin-bottom: 15px;
+        }
+
+        .milestone-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success-color);
+            width: 0%;
+            transition: width 1s ease-in-out;
+        }
+
+        /* --- Calendar --- */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 15px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            border-radius: 4px;
+            background: var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .day-success { background: var(--success-color); color: white; }
+        .day-relapse { background: var(--relapse-color); color: white; }
+        .day-future { opacity: 0.3; }
+
+        /* --- Motivation --- */
+        #quote-text {
+            font-style: italic;
+            color: var(--text-main);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        #quote-author {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 400px) {
+            .streak-value { font-size: 3.5rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h2 style="font-weight: 800; letter-spacing: -1px;">MONITOR</h2>
+            <button class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">🌓</button>
+        </header>
+
+        <!-- Setup View (Only shown first time) -->
+        <div id="setup-view" class="card hidden">
+            <h3>Begin Your Journey</h3>
+            <p style="color: var(--text-muted); margin: 15px 0;">Discipline is the bridge between goals and accomplishment.</p>
+            <label style="font-size: 0.8rem; display: block; margin-bottom: 5px;">When was your last relapse?</label>
+            <input type="date" id="start-date-input" style="padding: 10px; width: 100%; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 10px;">
+            <button class="btn-primary" onclick="initTracker()">Start Tracking</button>
+        </div>
+
+        <!-- Main Tracker View -->
+        <div id="tracker-view">
+            <div class="card">
+                <div class="streak-label">Current Streak</div>
+                <div class="streak-value" id="current-streak">0</div>
+                <div class="streak-label">Days Clean</div>
+                <p id="motivational-msg" style="margin-top: 15px; font-weight: 500; color: var(--success-color);"></p>
+                <button class="btn-relapse" onclick="handleRelapse()">I Relapsed</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-val" id="stat-current">0</span>
+                    <span class="stat-lbl">Current</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-val" id="stat-best">0</span>
+                    <span class="stat-lbl">Best</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-val" id="stat-total">0</span>
+                    <span class="stat-lbl">Relapses</span>
+                </div>
+            </div>
+
+            <div class="card milestone-container">
+                <h4 style="margin-bottom: 15px;">Milestones</h4>
+                <div id="milestones-list"></div>
+            </div>
+
+            <div class="card">
+                <h4 id="calendar-month">Month</h4>
+                <div class="calendar-grid" id="calendar-body"></div>
+            </div>
+
+            <div class="card">
+                <span id="quote-text">"He who has a why to live can bear almost any how."</span>
+                <span id="quote-author">- Friedrich Nietzsche</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Data Logic ---
+        let userData = {
+            startDate: null,
+            relapseHistory: [],
+            bestStreak: 0,
+            theme: 'light'
+        };
+
+        const quotes = [
+            { t: "Discipline is doing what needs to be done, even if you don't want to do it.", a: "Unknown" },
+            { t: "The first and greatest victory is to conquer yourself.", a: "Plato" },
+            { t: "Suffer the pain of discipline or suffer the pain of regret.", a: "Jim Rohn" },
+            { t: "Your future self will thank you for not giving up today.", a: "Unknown" },
+            { t: "Great acts are made up of small deeds.", a: "Lao Tzu" },
+            { t: "Freedom is not found in doing what you want, but in being master of yourself.", a: "Unknown" },
+            { t: "A man who masters himself is mightier than one who conquers a city.", a: "Proverbs" }
+        ];
+
+        const milestones = [7, 30, 90];
+
+        // --- Core Functions ---
+
+        function loadData() {
+            const saved = localStorage.getItem('noFapData');
+            if (saved) {
+                userData = JSON.parse(saved);
+                document.documentElement.setAttribute('data-theme', userData.theme);
+                showView('tracker');
+                updateUI();
+            } else {
+                showView('setup');
+                // Set default date to today for input
+                document.getElementById('start-date-input').valueAsDate = new Date();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('noFapData', JSON.stringify(userData));
+        }
+
+        function showView(view) {
+            document.getElementById('setup-view').classList.toggle('hidden', view !== 'setup');
+            document.getElementById('tracker-view').classList.toggle('hidden', view !== 'tracker');
+        }
+
+        function initTracker() {
+            const inputDate = document.getElementById('start-date-input').value;
+            if (!inputDate) return alert("Please select a date");
+            
+            userData.startDate = new Date(inputDate).getTime();
+            showView('tracker');
+            updateUI();
+            saveData();
+        }
+
+        function calculateStreak() {
+            if (!userData.startDate) return 0;
+            const diff = Date.now() - userData.startDate;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            return days < 0 ? 0 : days;
+        }
+
+        function handleRelapse() {
+            if (confirm("Reset your streak? Be honest with yourself. Every failure is a lesson.")) {
+                const today = new Date().setHours(0,0,0,0);
+                userData.relapseHistory.push(today);
+                
+                // Check if current streak was the best
+                const current = calculateStreak();
+                if (current > userData.bestStreak) userData.bestStreak = current;
+                
+                // Reset start date to now
+                userData.startDate = new Date().getTime();
+                
+                updateUI();
+                saveData();
+            }
+        }
+
+        function updateUI() {
+            const currentStreak = calculateStreak();
+            
+            // Best streak update
+            if (currentStreak > userData.bestStreak) {
+                userData.bestStreak = currentStreak;
+            }
+
+            // Update DOM
+            document.getElementById('current-streak').innerText = currentStreak;
+            document.getElementById('stat-current').innerText = currentStreak;
+            document.getElementById('stat-best').innerText = userData.bestStreak;
+            document.getElementById('stat-total').innerText = userData.relapseHistory.length;
+            
+            // Message
+            const msgs = ["Stay strong 💪", "Focus on the goal", "One day at a time", "You're improving!"];
+            document.getElementById('motivational-msg').innerText = currentStreak === 0 ? "Starting is the hardest part." : msgs[currentStreak % msgs.length];
+
+            renderMilestones(currentStreak);
+            renderCalendar();
+            renderQuote();
+        }
+
+        function renderMilestones(streak) {
+            const container = document.getElementById('milestones-list');
+            container.innerHTML = '';
+            
+            milestones.forEach(m => {
+                const percent = Math.min(Math.round((streak / m) * 100), 100);
+                const row = document.createElement('div');
+                row.className = 'milestone-row';
+                row.innerHTML = `
+                    <div class="milestone-info">
+                        <span>${m} Day Challenge</span>
+                        <span>${percent}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${percent}%"></div>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function renderCalendar() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const monthName = now.toLocaleString('default', { month: 'long' });
+            
+            document.getElementById('calendar-month').innerText = `${monthName} ${year}`;
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const calendarBody = document.getElementById('calendar-body');
+            calendarBody.innerHTML = '';
+
+            // Add empty spaces for previous month days
+            for (let i = 0; i < firstDay; i++) {
+                const empty = document.createElement('div');
+                calendarBody.appendChild(empty);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const div = document.createElement('div');
+                div.className = 'calendar-day';
+                div.innerText = day;
+                
+                const checkDate = new Date(year, month, day).setHours(0,0,0,0);
+                const today = new Date().setHours(0,0,0,0);
+                
+                if (userData.relapseHistory.includes(checkDate)) {
+                    div.classList.add('day-relapse');
+                } else if (checkDate >= userData.startDate && checkDate <= today) {
+                    div.classList.add('day-success');
+                } else if (checkDate > today) {
+                    div.classList.add('day-future');
+                }
+                
+                calendarBody.appendChild(div);
+            }
+        }
+
+        function renderQuote() {
+            const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+            const quote = quotes[dayOfYear % quotes.length];
+            document.getElementById('quote-text').innerText = `"${quote.t}"`;
+            document.getElementById('quote-author').innerText = `- ${quote.a}`;
+        }
+
+        // --- Theme Management ---
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            userData.theme = userData.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', userData.theme);
+            saveData();
+        });
+
+        // Initialize App
+        window.onload = loadData;
+    </script>
+</body>
+</html>
