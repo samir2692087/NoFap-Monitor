@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NoFap Monitor Pro | Behavior Intelligence</title>
+    <style>
+        :root {
+            --primary: #0984e3;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --text: #2d3436;
+            --text-muted: #636e72;
+            --border: #dfe6e9;
+            --radius: 20px;
+            --shadow: 0 12px 24px rgba(0,0,0,0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #333333;
+            --shadow: 0 12px 30px rgba(0,0,0,0.4);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', system-ui, sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0; padding: 0;
+            display: flex; justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container { width: 100%; max-width: 480px; padding: 20px; padding-bottom: 120px; }
+
+        /* --- Focus Mode Styles --- */
+        body.focus-mode .hide-focus { display: none !important; }
+        body.focus-mode .container { max-width: 400px; }
+
+        /* --- Header --- */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .branding h1 { font-size: 1.4rem; margin: 0; font-weight: 800; }
+        .branding span { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); }
+
+        /* --- Cards --- */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            animation: slideUp 0.6s ease-out;
+            position: relative;
+        }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Streak Display --- */
+        .streak-container { text-align: center; }
+        .streak-val { font-size: 5.5rem; font-weight: 900; color: var(--primary); line-height: 1; margin: 10px 0; }
+        .smart-feedback { font-size: 0.95rem; font-weight: 600; color: var(--success); margin-bottom: 15px; min-height: 1.2em; }
+
+        /* --- Timeline --- */
+        .timeline {
+            display: flex; gap: 8px; overflow-x: auto; padding: 10px 0;
+            scrollbar-width: none; -ms-overflow-style: none;
+        }
+        .timeline::-webkit-scrollbar { display: none; }
+        .t-day {
+            min-width: 35px; height: 35px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: bold; background: var(--bg); color: var(--text-muted);
+        }
+        .t-success { background: var(--success); color: white; }
+        .t-relapse { background: var(--danger); color: white; }
+        .t-freeze { background: #74b9ff; color: white; }
+
+        /* --- Controls --- */
+        button {
+            border: none; border-radius: 14px; padding: 16px;
+            font-weight: 700; cursor: pointer; width: 100%;
+            transition: var(--transition); font-size: 1rem;
+        }
+        button:active { transform: scale(0.96); }
+        .btn-checkin { background: var(--primary); color: white; margin-bottom: 12px; }
+        .btn-checkin:disabled { background: var(--border); color: var(--text-muted); }
+        .btn-relapse { background: transparent; color: var(--danger); border: 1.5px solid var(--danger); font-size: 0.85rem; }
+
+        /* --- Insights --- */
+        .insight-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+        .insight-row:last-child { border: none; }
+        .risk-tag { color: var(--danger); font-weight: 800; }
+
+        /* --- Micro Rewards Toast --- */
+        #toast-container {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 9999; pointer-events: none;
+        }
+        .toast {
+            background: var(--text); color: var(--card); padding: 12px 24px;
+            border-radius: 30px; font-weight: 700; margin-bottom: 10px;
+            animation: toastIn 0.3s ease, toastOut 0.3s ease 2s forwards;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        @keyframes toastIn { from { transform: translateY(-50px); opacity: 0; } }
+        @keyframes toastOut { to { transform: translateY(-50px); opacity: 0; } }
+
+        /* --- Modals --- */
+        .modal {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.8); display: none;
+            align-items: center; justify-content: center; z-index: 2000; padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content { background: var(--card); padding: 30px; border-radius: var(--radius); width: 100%; max-width: 400px; }
+        .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .option-btn { background: var(--bg); padding: 15px; border-radius: 12px; text-align: center; font-size: 0.8rem; border: 1px solid var(--border); cursor: pointer; }
+        .option-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* --- Toggle Switch --- */
+        .switch { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 600; }
+        input[type="checkbox"] { width: 40px; height: 20px; appearance: none; background: var(--border); border-radius: 20px; position: relative; cursor: pointer; transition: 0.3s; }
+        input[type="checkbox"]:checked { background: var(--primary); }
+        input[type="checkbox"]::before { content: ''; position: absolute; width: 16px; height: 16px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: 0.3s; }
+        input[type="checkbox"]:checked::before { left: 22px; }
+
+        .challenge-box { display: flex; align-items: center; gap: 12px; background: var(--bg); padding: 12px; border-radius: 12px; margin-top: 10px; border-left: 4px solid var(--warning); }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <div class="container">
+        <header>
+            <div class="branding">
+                <h1>NoFap Monitor <span>Pro</span></h1>
+                <div id="streak-freeze-count" style="font-size: 0.7rem; color: var(--primary); font-weight: bold; margin-top: 4px;">❄️ 0 Freezes Available</div>
+            </div>
+            <div class="flex" style="display:flex; gap: 15px;">
+                <label class="switch">
+                    Focus Mode
+                    <input type="checkbox" id="focusToggle" onchange="toggleFocusMode()">
+                </label>
+            </div>
+        </header>
+
+        <!-- Main Streak Card -->
+        <div class="card streak-container">
+            <div id="smart-feedback" class="smart-feedback">Analyzing your progress...</div>
+            <div class="streak-label" style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.7rem; color: var(--text-muted);">Current Streak</div>
+            <div class="streak-val" id="streak-display">0</div>
+            
+            <button class="btn-checkin" id="checkin-btn" onclick="handleCheckIn()">Mark Today Clean ✅</button>
+            <button class="btn-relapse hide-focus" onclick="openRelapseModal()">I Relapsed</button>
+        </div>
+
+        <!-- Timeline -->
+        <div class="card hide-focus" style="padding: 15px 24px;">
+            <div class="streak-label" style="margin-bottom: 10px; font-size: 0.7rem;">Streak History</div>
+            <div class="timeline" id="timeline"></div>
+        </div>
+
+        <!-- Daily Challenge -->
+        <div class="card hide-focus">
+            <div class="streak-label" style="font-size: 0.7rem;">Daily Challenge 🎯</div>
+            <div class="challenge-box" id="challenge-item">Loading challenge...</div>
+        </div>
+
+        <!-- Insights -->
+        <div class="card hide-focus">
+            <div class="streak-label" style="margin-bottom: 15px; font-size: 0.7rem;">Behavioral Analysis</div>
+            <div class="insight-row">
+                <span>Discipline Score</span>
+                <span id="stat-score" style="font-weight: 800; color: var(--primary);">0</span>
+            </div>
+            <div class="insight-row">
+                <span>High Risk Window</span>
+                <span id="stat-risk" class="risk-tag">Not enough data</span>
+            </div>
+            <div class="insight-row">
+                <span>Main Trigger</span>
+                <span id="stat-trigger" style="font-weight: 600;">None detected</span>
+            </div>
+        </div>
+
+        <!-- Management -->
+        <div class="card hide-focus" style="display: flex; gap: 10px; background: transparent; border: none; box-shadow: none; padding: 0;">
+            <button style="background: var(--card); color: var(--text); border: 1px solid var(--border);" onclick="exportData()">Export Backup</button>
+            <button style="background: var(--card); color: var(--danger); border: 1px solid var(--border);" onclick="resetAllData()">Hard Reset</button>
+        </div>
+    </div>
+
+    <!-- Relapse Analysis Modal -->
+    <div class="modal" id="relapse-modal">
+        <div class="modal-content">
+            <h3 style="margin: 0 0 10px 0;">Relapse Analysis</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">This isn't failure—it's data. Be honest to detect patterns.</p>
+            
+            <p style="font-size: 0.8rem; font-weight: 700; margin-top: 20px;">When did it happen?</p>
+            <div class="option-grid" id="time-options">
+                <div class="option-btn" onclick="selectRelapseTime('Morning')">🌅 Morning</div>
+                <div class="option-btn" onclick="selectRelapseTime('Afternoon')">☀️ Afternoon</div>
+                <div class="option-btn" onclick="selectRelapseTime('Night')">🌙 Night</div>
+                <div class="option-btn" onclick="selectRelapseTime('Late Night')">🦉 Late Night</div>
+            </div>
+
+            <p style="font-size: 0.8rem; font-weight: 700; margin-top: 20px;">What was the primary trigger?</p>
+            <div class="option-grid" id="trigger-options">
+                <div class="option-btn" onclick="selectRelapseTrigger('Boredom')">Boredom</div>
+                <div class="option-btn" onclick="selectRelapseTrigger('Stress')">Stress</div>
+                <div class="option-btn" onclick="selectRelapseTrigger('Social Media')">Social Media</div>
+                <div class="option-btn" onclick="selectRelapseTrigger('Insomnia')">Insomnia</div>
+            </div>
+
+            <button class="btn-checkin" style="margin-top: 25px;" onclick="submitRelapse()">Analyze & Restart</button>
+            <button class="btn-relapse" style="border:none; margin: 5px 0;" onclick="closeRelapseModal()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        /* --- State Engine --- */
+        let state = {
+            checkIns: [], // YYYY-MM-DD
+            relapses: [], // {date, time, reason}
+            freezesUsed: 0,
+            settings: { theme: 'dark', focusMode: false },
+            disciplineScore: 0
+        };
+
+        const CHALLENGES = [
+            "No social media before 10 AM",
+            "10 Pushups every time you open a browser",
+            "Read 5 pages of a book",
+            "Cold shower today",
+            "Leave your phone in another room for 1 hour",
+            "Journal your thoughts for 5 minutes"
+        ];
+
+        let pendingRelapse = { time: '', reason: '' };
+
+        /* --- Initialization --- */
+        function init() {
+            const saved = localStorage.getItem('NoFapMonitorPro_V3');
+            if (saved) state = JSON.parse(saved);
+            
+            document.body.classList.toggle('focus-mode', state.settings.focusMode);
+            document.getElementById('focusToggle').checked = state.settings.focusMode;
+            
+            // Auto-check for Freeze eligibility
+            applyStreakFreeze();
+            updateUI();
+        }
+
+        function save() {
+            localStorage.setItem('NoFapMonitorPro_V3', JSON.stringify(state));
+        }
+
+        /* --- Streak Logic --- */
+        function getTodayStr() { return new Date().toISOString().split('T')[0]; }
+
+        function calculateStreak() {
+            if (state.checkIns.length === 0) return 0;
+            const sorted = [...new Set(state.checkIns)].sort().reverse();
+            let streak = 0;
+            let current = new Date(getTodayStr());
+
+            // If didn't check in today, start from yesterday
+            if (sorted[0] !== getTodayStr()) {
+                current.setDate(current.getDate() - 1);
+            }
+
+            for (let i = 0; i < sorted.length; i++) {
+                const date = new Date(sorted[i]);
+                const diff = (current - date) / (1000 * 60 * 60 * 24);
+
+                if (diff === 0) {
+                    streak++;
+                    current.setDate(current.getDate() - 1);
+                } else { break; }
+            }
+            return streak;
+        }
+
+        function applyStreakFreeze() {
+            const today = getTodayStr();
+            if (state.checkIns.length === 0) return;
+            
+            const sorted = [...new Set(state.checkIns)].sort().reverse();
+            const lastCheck = new Date(sorted[0]);
+            const diffDays = Math.floor((new Date(today) - lastCheck) / (1000 * 60 * 60 * 24));
+
+            // If gap is exactly 2 days and user has an available freeze
+            if (diffDays === 2) {
+                const totalClean = state.checkIns.length;
+                const availableFreezes = Math.floor(totalClean / 7) - state.freezesUsed;
+                
+                if (availableFreezes > 0) {
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    state.checkIns.push(yesterday.toISOString().split('T')[0]);
+                    state.freezesUsed++;
+                    showToast("❄️ Streak Freeze Applied!");
+                    save();
+                }
+            }
+        }
+
+        /* --- Actions --- */
+        function handleCheckIn() {
+            const today = getTodayStr();
+            if (!state.checkIns.includes(today)) {
+                state.checkIns.push(today);
+                showToast("+10 Discipline Points");
+                showToast("Strong control 💪");
+                save();
+                updateUI();
+            }
+        }
+
+        function openRelapseModal() { document.getElementById('relapse-modal').style.display = 'flex'; }
+        function closeRelapseModal() { document.getElementById('relapse-modal').style.display = 'none'; }
+
+        function selectRelapseTime(t) {
+            pendingRelapse.time = t;
+            highlightSelection('time-options', t);
+        }
+
+        function selectRelapseTrigger(r) {
+            pendingRelapse.reason = r;
+            highlightSelection('trigger-options', r);
+        }
+
+        function highlightSelection(containerId, text) {
+            const btns = document.querySelectorAll(`#${containerId} .option-btn`);
+            btns.forEach(b => {
+                b.style.borderColor = b.innerText.includes(text) ? 'var(--primary)' : 'var(--border)';
+                b.style.color = b.innerText.includes(text) ? 'var(--primary)' : 'var(--text-muted)';
+            });
+        }
+
+        function submitRelapse() {
+            if (!pendingRelapse.time || !pendingRelapse.reason) {
+                return showToast("Please select time and reason");
+            }
+            state.relapses.push({ date: getTodayStr(), ...pendingRelapse });
+            state.checkIns = []; // Reset streak
+            state.freezesUsed = 0; // Optional: Reset freezes on relapse
+            
+            save();
+            closeRelapseModal();
+            updateUI();
+            showToast("Recovery started. Clean slate.");
+        }
+
+        /* --- UI Updates --- */
+        function updateUI() {
+            const streak = calculateStreak();
+            document.getElementById('streak-display').innerText = streak;
+            
+            // Checkin Button State
+            const btn = document.getElementById('checkin-btn');
+            if (state.checkIns.includes(getTodayStr())) {
+                btn.disabled = true;
+                btn.innerText = "Marked Clean ✅";
+            } else {
+                btn.disabled = false;
+                btn.innerText = "Mark Today Clean ✅";
+            }
+
+            // Feedback
+            const feedback = document.getElementById('smart-feedback');
+            if (streak === 0) feedback.innerText = "Start strong. One clean day matters.";
+            else if (streak < 7) feedback.innerText = "You're building control. Stay consistent.";
+            else if (streak < 30) feedback.innerText = "The habit is forming. Keep going!";
+            else feedback.innerText = "You're in elite discipline zone 🔥";
+
+            // Freezes
+            const availFreezes = Math.floor(state.checkIns.length / 7) - state.freezesUsed;
+            document.getElementById('streak-freeze-count').innerText = `❄️ ${Math.max(0, availFreezes)} Freezes Available`;
+
+            renderTimeline();
+            renderInsights();
+            renderChallenge();
+            
+            // Discipline Score
+            const score = (streak * 5) + (state.checkIns.length * 2) - (state.relapses.length * 20);
+            document.getElementById('stat-score').innerText = Math.max(0, score);
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timeline');
+            container.innerHTML = '';
+            const today = new Date();
+            for (let i = 14; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(today.getDate() - i);
+                const dStr = d.toISOString().split('T')[0];
+                
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 't-day';
+                dayDiv.innerText = d.getDate();
+                
+                if (state.checkIns.includes(dStr)) dayDiv.classList.add('t-success');
+                if (state.relapses.some(r => r.date === dStr)) dayDiv.classList.add('t-relapse');
+                
+                container.appendChild(dayDiv);
+            }
+            container.scrollLeft = container.scrollWidth;
+        }
+
+        function renderInsights() {
+            if (state.relapses.length > 0) {
+                const times = state.relapses.map(r => r.time);
+                const reasons = state.relapses.map(r => r.reason);
+                
+                const topTime = times.sort((a,b) => times.filter(v => v===a).length - times.filter(v => v===b).length).pop();
+                const topReason = reasons.sort((a,b) => reasons.filter(v => v===a).length - reasons.filter(v => v===b).length).pop();
+                
+                document.getElementById('stat-risk').innerText = `High Risk: ${topTime}`;
+                document.getElementById('stat-trigger').innerText = topReason;
+            }
+        }
+
+        function renderChallenge() {
+            const dayIdx = new Date().getDate() % CHALLENGES.length;
+            document.getElementById('challenge-item').innerText = CHALLENGES[dayIdx];
+        }
+
+        /* --- Utils --- */
+        function toggleFocusMode() {
+            state.settings.focusMode = document.getElementById('focusToggle').checked;
+            document.body.classList.toggle('focus-mode', state.settings.focusMode);
+            save();
+        }
+
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 2300);
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "nofap_pro_backup.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function resetAllData() {
+            if (confirm("Permanently erase everything? This cannot be undone.")) {
+                localStorage.removeItem('NoFapMonitorPro_V3');
+                location.reload();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
