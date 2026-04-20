@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NoFap Monitor Pro | 3D</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div id="toast-container"></div>
+
+    <div class="app-shell">
+        <div class="container">
+            <header class="floating-header">
+                <div class="branding">
+                    <h1>Monitor <span class="accent-3d">PRO</span></h1>
+                    <div id="freeze-status" class="badge-inner">❄️ 0 Freezes</div>
+                </div>
+                <div class="header-actions">
+                    <button id="themeToggle" class="icon-btn-3d">🌓</button>
+                    <label class="glass-switch">
+                        <input type="checkbox" id="focusToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </header>
+
+            <main class="content-layers">
+                <!-- Main Streak Panel -->
+                <section class="card-3d primary-layer">
+                    <div id="feedback" class="status-text">Building Momentum...</div>
+                    <div class="streak-depth-box">
+                        <h2 id="streak-display" class="embossed-text">0</h2>
+                        <p class="label-3d">Days Clean</p>
+                    </div>
+                    <div class="action-grid">
+                        <button class="btn-tactile btn-primary" id="checkin-btn">Mark Today Clean ✅</button>
+                        <button class="btn-tactile btn-danger hide-focus" id="relapse-btn">I Relapsed</button>
+                    </div>
+                </section>
+
+                <!-- Stats Layer -->
+                <section class="stats-row hide-focus">
+                    <div class="card-3d mini-card">
+                        <span class="val-3d" id="score-display">0</span>
+                        <span class="lbl-3d">Score</span>
+                    </div>
+                    <div class="card-3d mini-card">
+                        <span class="val-3d" id="level-display">Beginner</span>
+                        <span class="lbl-3d">Rank</span>
+                    </div>
+                </section>
+
+                <!-- Timeline Layer -->
+                <section class="card-3d mid-layer hide-focus">
+                    <p class="lbl-3d">Consistency Timeline</p>
+                    <div class="timeline-3d" id="timeline"></div>
+                </section>
+
+                <!-- Tools Layer -->
+                <footer class="tool-layer hide-focus">
+                    <button class="btn-glass" id="pdf-btn">Generate Performance PDF</button>
+                    <div class="dual-btns">
+                        <button class="btn-tactile-sm" id="backup-btn">Backup</button>
+                        <button class="btn-tactile-sm danger-text" id="reset-btn">Reset</button>
+                    </div>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <!-- Glass Modal -->
+    <div id="relapse-modal" class="glass-overlay hidden">
+        <div class="glass-card scale-in">
+            <h3>Analyze Relapse</h3>
+            <div class="modal-options">
+                <button class="option-btn-3d">Stress</button>
+                <button class="option-btn-3d">Boredom</button>
+                <button class="option-btn-3d">Social Media</button>
+            </div>
+            <button class="btn-tactile btn-close">Cancel</button>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
