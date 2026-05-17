@@ -1,2 +1,0 @@
-# NoFap-Monitor
-NoFap Monitor
